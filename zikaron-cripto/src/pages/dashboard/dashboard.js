@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ZikaronSidebar from "../components/menuLateral";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -398,18 +397,8 @@ export default function ZikaronDashboard() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: C.bg, overflow: "hidden" }}>
+    <div style={{ height: "100vh", display: "flex", width: "100%", height: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: C.bg, overflow: "hidden" }}>
 
-      {/* SIDEBAR */}
-      {!isMobile && (
-        <ZikaronSidebar
-          open={sidebarOpen}
-          onToggle={() => setSidebarOpen(prev => !prev)}
-          activeNav={activeNav}
-          onNav={setActiveNav}
-          user={USER}
-        />
-      )}
 
       {/* MAIN */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>

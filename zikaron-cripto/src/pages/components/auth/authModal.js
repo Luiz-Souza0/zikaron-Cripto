@@ -327,7 +327,10 @@ export function ZikaronLoginModal({ open, onClose, onSuccess, onGoRegister }) {
         // Simula chamada de API — substitua pelo seu fetch/axios
         await new Promise(r => setTimeout(r, 1400));
         setLoading(false);
-        onSuccess?.({ email });
+        onSuccess?.({
+            email,
+            password
+        });
     }
 
     if (!open) return null;
@@ -427,6 +430,8 @@ export function ZikaronRegisterModal({ open, onClose, onSuccess, onGoLogin }) {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [touched, setTouched] = useState({});
+    const [role, setRole] = useState("standard");
+    // setRole("standard");
 
     useEffect(() => {
         if (open) {
@@ -458,15 +463,35 @@ export function ZikaronRegisterModal({ open, onClose, onSuccess, onGoLogin }) {
 
     async function handleSubmit(ev) {
         ev.preventDefault();
-        setTouched({ name: true, email: true, password: true, confirm: true, agree: true });
-        const e = validate();
-        setErrors(e);
-        if (Object.keys(e).length > 0) return;
 
-        setLoading(true);
-        await new Promise(r => setTimeout(r, 1600));
-        setLoading(false);
-        onSuccess?.({ name, email });
+        setTouched({
+            name: true,
+            email: true,
+            password: true,
+            confirm: true,
+            agree: true,
+        });
+
+        const validationErrors = validate();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            await onSuccess?.({
+                name: name.trim(),
+                email: email.trim().toLowerCase(),
+                password,
+                role,
+            });
+
+        } finally {
+            setLoading(false);
+        }
     }
 
     if (!open) return null;
@@ -531,6 +556,13 @@ export function ZikaronRegisterModal({ open, onClose, onSuccess, onGoLogin }) {
                         error={touched.confirm ? errors.confirm : null}
                         placeholder="Repita a senha"
                     />
+                    <Field
+                        label="Cargo"
+                        type="text"
+                        value={role}
+                        onChange={v => { setRole(v); }}
+                        placeholder="Ex: Administrador, Usuário, etc."
+                    />
 
                     {/* Agree checkbox */}
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -543,9 +575,9 @@ export function ZikaronRegisterModal({ open, onClose, onSuccess, onGoLogin }) {
                         />
                         <label htmlFor="agree" style={{ fontSize: 13, color: C.textSec, cursor: "pointer", lineHeight: 1.5 }}>
                             Li e aceito os{" "}
-                            <Link to="/terms" style={{textDecoration: 'none' }} onClick={onClose} ><span style={{ color: C.green, fontSize:"16px"  }}>Termos de Uso</span></Link>
+                            <Link to="/terms" style={{ textDecoration: 'none' }} onClick={onClose} ><span style={{ color: C.green, fontSize: "16px" }}>Termos de Uso</span></Link>
                             {" "}e a{" "}
-                            <Link to="/privacy" style={{textDecoration: 'none' }} onClick={onClose}><span style={{ color: C.green, fontSize:"16px"  }}>Política de Privacidade</span></Link>
+                            <Link to="/privacy" style={{ textDecoration: 'none' }} onClick={onClose}><span style={{ color: C.green, fontSize: "16px" }}>Política de Privacidade</span></Link>
                             {" "}do Zikaron Cripto
                         </label>
                     </div>

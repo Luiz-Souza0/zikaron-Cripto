@@ -2,20 +2,29 @@ import { Routes, Route } from "react-router-dom";
 
 import ZikaronDashboard from "../../pages/dashboard/dashboard";
 import Home from "../../pages/home";
+import Wallet from "../../pages/connect/wallet";
 // import Wallets from "../../pages/wallets/wallets";
 // import Transactions from "../../pages/transactions/transactions";
 
 export default function MiddleService({ token }) {
     return (
-        <Routes>
-            <Route
-                path="/Dashboard"
-                element={<ZikaronDashboard token={token} />}
-            />
-
+        <Routes> 
             <Route
                 path="/"
                 element={<Home/>}
+            />
+            
+            
+            if(token){
+                <Route
+                    path="/Dashboard"
+                    element={<ZikaronDashboard token={token} />}
+                />
+            }
+
+            <Route
+                path="/wallets"
+                element={<Wallet/>}
             />
 
             if (token["role"] != "admint") {

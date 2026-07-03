@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import "./App.css";
 
+import { login, register } from "./api/api/api";
+
 import ZikaronHeader from "./pages/components/header/header";
 import ZikaronSidebar from "./pages/components/menuLateral";
 import MiddleService from "./api/api/middleware";
@@ -12,74 +14,18 @@ function App() {
     const [modal, setModal] = useState(null);
     const [activeNav, setActiveNav] = useState("dashboard");
 
-const [token] = useState({
-    user: {
-        id: 1,
-        name: "Luiz Souza",
-        initials: "LS",
-        plan: "Premium",
-    },
+    const [token, setToken] = useState(() => {
+        const saved = localStorage.getItem("auth");
 
-    menu: [
-        {
-            section: "Geral",
-            items: [
-                {
-                    id: "dashboard",
-                    icon: "▦",
-                    label: "Dashboard",
-                    link: "/",
-                },
-                {
-                    id: "wallets",
-                    icon: "◈",
-                    label: "Carteiras",
-                    link: "/wallets",
-                },
-                {
-                    id: "tx",
-                    icon: "⇄",
-                    label: "Transações",
-                    link: "/transactions",
-                },
-            ],
-        },
-        {
-            section: "Fiscal",
-            items: [
-                {
-                    id: "gcap",
-                    icon: "⊟",
-                    label: "Relatório GCAP",
-                    link: "/gcap",
-                },
-                {
-                    id: "ir",
-                    icon: "◻",
-                    label: "Imposto de Renda",
-                    link: "/ir",
-                },
-                {
-                    id: "alerts",
-                    icon: "◉",
-                    label: "Alertas",
-                    link: "/alerts",
-                },
-            ],
-        },
-        {
-            section: "Conta",
-            items: [
-                {
-                    id: "settings",
-                    icon: "⚙",
-                    label: "Configurações",
-                    link: "/settings",
-                },
-            ],
-        },
-    ],
-});
+        return saved
+            ? JSON.parse(saved)
+            : null;
+    });
+
+    function logout() {
+        localStorage.removeItem("auth");
+        setToken(null);
+    }
 
     function openModal(Type) {
         setModal(Type);
@@ -87,12 +33,11 @@ const [token] = useState({
     return (
         <div
             style={{
-                margin: 0 ,
+                margin: 0,
                 display: "flex"
             }}
         >
             <ZikaronSidebar
-                token={token}
                 open={sidebarOpen}
                 onToggle={() => setSidebarOpen(!sidebarOpen)}
                 activeNav={activeNav}
@@ -110,9 +55,9 @@ const [token] = useState({
                     open={sidebarOpen}
                     onToggle={() => setSidebarOpen(!sidebarOpen)}
                     title="Dashboard"
-                    onOpenModal={openModal} 
-                    user={token.user} 
-
+                    onOpenModal={openModal}
+                    user={token?.user}
+                    onLogout={logout}
                 />
 
                 <div
@@ -125,24 +70,45 @@ const [token] = useState({
                 </div>
             </div>
             <ZikaronLoginModal
-                    open={modal === "login"}
-                    onClose={() => setModal(null)}
-                    onSuccess={({ email }) => {
-                        // seu fetch de login aqui
-                        setModal(null);
-                    }}
-                    onGoRegister={() => setModal("register")}
-                    />
+                open={modal === "login"}
+                onClose={() => setModal(null)}
+                onSuccess={async ({ email, password }) => {
+                    try {
 
-                    <ZikaronRegisterModal
-                    open={modal === "register"}
-                    onClose={() => setModal(null)}
-                    onSuccess={({ name, email }) => {
-                        // seu fetch de cadastro aqui
+                        const auth = await login(email, password);
+
+                        localStorage.setItem(
+                            "auth",
+                            JSON.stringify(auth)
+                        );
+
+                        setToken(auth);
+
                         setModal(null);
-                    }}
-                    onGoLogin={() => setModal("login")}
-                    />
+
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                }}
+                onGoRegister={() => setModal("register")}
+            />
+
+            <ZikaronRegisterModal
+                open={modal === "register"}
+                onClose={() => setModal(null)}
+                onSuccess={async ({ name, email, password, role }) => {
+                    try {
+                        await register(name, email, password, role);
+
+                        alert("Cadastro realizado com sucesso!");
+
+                        setModal("login");
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                }}
+                onGoLogin={() => setModal("login")}
+            />
         </div>
     );
 }

@@ -3,16 +3,19 @@
 
 import { useState } from "react";
 
-const C = {
-    green: "#06402B",
-    brownMid: "#9B6245",
-    brown:      "#7A4E38",   // ← estava faltando
 
-};
+    const C = {
+        green: "#06402B",
+        greenHover: "#0A5A3E",
+        greenPale: "#EAF6F0",
+        brown: "#7A4E38",
+        brownMid: "#9B6245",
+    };
+
 
 function HeaderButton({ label, variant = "outline", onClick }) {
     const [hov, setHov] = useState(false);
- 
+
     const styles = {
         solid: {
             background: hov ? C.greenHover : C.green,
@@ -50,8 +53,9 @@ export default function ZikaronHeader({
     open,
     onToggle,
     title = "Dashboard",
-    onOpenModal, 
-    user
+    onOpenModal,
+    user,
+    onLogout
 }) {
     const [hover, setHover] = useState(false);
 
@@ -108,25 +112,70 @@ export default function ZikaronHeader({
 
             <div
                 style={{
-                    fontSize: 13,
-                    color: "#6b7280",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
                 }}
             >
-                {!user ? (
-            // Avatar do usuário logado
-            <div style={{ width: 32, height: 32, borderRadius: "50%",
-                background: C.brown, color: "#fff", display: "flex",
-                alignItems: "center", justifyContent: "center",
-                fontWeight: 600, fontSize: 12 }}>
-                {user.initials}
-            </div>
-        ) : (
-            // Botões de login/cadastro
-            <>
-                <HeaderButton label="Entrar" variant="outline" onClick={() => onOpenModal?.("login")} />
-                <HeaderButton label="Criar conta" variant="solid" onClick={() => onOpenModal?.("register")} />
-            </>
-        )}
+                {user ? (
+                    <>
+                        <span
+                            style={{
+                                fontSize: 14,
+                                color: "#4b5563",
+                                fontWeight: 500,
+                            }}
+                        >
+                            {user.name}
+                        </span>
+
+                        <div
+                            style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "50%",
+                                background: C.brown,
+                                color: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontWeight: 700,
+                                fontSize: 13,
+                            }}
+                        >
+                            {user.initials}
+                        </div>
+
+                        <button
+                            onClick={onLogout}
+                            style={{
+                                border: "none",
+                                background: "transparent",
+                                color: C.green,
+                                cursor: "pointer",
+                                fontWeight: 600,
+                                fontSize: 13,
+                            }}
+                        >
+                            Sair
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <HeaderButton
+                            label="Entrar"
+                            variant="outline"
+                            style={{ marginRight: 8 }}
+                            onClick={() => onOpenModal?.("login")}
+                        />
+
+                        <HeaderButton
+                            label="Criar conta"
+                            variant="solid"
+                            onClick={() => onOpenModal?.("register")}
+                        />
+                    </>
+                )}
             </div>
         </header>
     );

@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Administrador",
+    "email": "admin@email.com",
+    "password": "$2b$12$JTRMES1wlwuc04DYoAyqI.qlW3Tf5YHK06fBaCMo5CV3dX1VWCfLq",
+    "role": "adm"
+  },
+  {
+    "id": 2,
+    "name": "Administrador",
+    "email": "admin@email.acom",
+    "password": "$2b$12$/RsERVmLCefkQjG250WYxuhkt0ghOAKFR3ryS19D6WmXlTCFHy4Py",
+    "role": "adm"
+  },
+  {
+    "id": 3,
+    "name": "Administrador",
+    "email": "joao@email.acom",
+    "password": "$2b$12$vUY4/kEZRG8rf9niv/XpqOXYCRaelsfxQ7ztrukEp2/eQaCFGNF1O",
+    "role": "standard"
+  },
+  {
+    "id": 4,
+    "name": "luiz",
+    "email": "luiz@email.com",
+    "password": "$2b$12$a6ghW/2XvXi3XVjBEXgo/uf.UlpNRj4BnvPYhOnx67wYWIZYefWwW",
+    "role": "standard"
+  }
+]

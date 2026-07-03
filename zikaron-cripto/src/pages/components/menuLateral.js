@@ -208,16 +208,78 @@ function UserChip({ user, open }) {
 }
 
 export default function ZikaronSidebar({
-    token,
     open,
 }) {
-    const menu = token?.menu ?? [];
+    const menu = [
+            {
+                section: "Geral",
+                items: [
+                    {
+                        id: "dashboard",
+                        icon: "▦",
+                        label: "Dashboard",
+                        link: "/",
+                    },
+                    {
+                        id: "wallets",
+                        icon: "◈",
+                        label: "Carteiras",
+                        link: "/wallets",
+                    },
+                    {
+                        id: "tx",
+                        icon: "⇄",
+                        label: "Transações",
+                        link: "/transactions",
+                    },
+                ],
+            },
+            {
+                section: "Fiscal",
+                items: [
+                    {
+                        id: "gcap",
+                        icon: "⊟",
+                        label: "Relatório GCAP",
+                        link: "/gcap",
+                    },
+                    {
+                        id: "ir",
+                        icon: "◻",
+                        label: "Imposto de Renda",
+                        link: "/ir",
+                    },
+                    {
+                        id: "alerts",
+                        icon: "◉",
+                        label: "Alertas",
+                        link: "/alerts",
+                    },
+                ],
+            },
+            {
+                section: "Conta",
+                items: [
+                    {
+                        id: "settings",
+                        icon: "⚙",
+                        label: "Configurações",
+                        link: "/settings",
+                    },
+                ],
+            },
+        ];
 
-    const user = token?.user ?? {
-        name: "",
-        initials: "",
-        plan: "",
-    };
+    const user = {
+        name: "Luiz Souza",
+        initials: "LS",
+        plan: "Premium",
+    } 
+    // token?.user ?? {
+    //     name: "",
+    //     initials: "",
+    //     plan: "",
+    // };
 
     return (
         <div

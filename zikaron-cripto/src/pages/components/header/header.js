@@ -63,7 +63,7 @@ export default function ZikaronHeader({
         <header
             style={{
                 height: 60,
-                background: "#fff",
+                background: "#636363",
                 borderBottom: "1px solid #e5e7eb",
                 display: "flex",
                 alignItems: "center",

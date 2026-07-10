@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { API } from "../../api/api/api";
+import { convertBalancesList, sumConverted } from "./convert";
 
 const PROXY = "http://localhost:3001";
 const REFRESH_INTERVAL = 3 * 60 * 1000; // 3 minutos em ms
@@ -14,90 +15,95 @@ function fmt(v) {
 }
 
 export default function Wallet() {
-    const [apiKey,     setApiKey]     = useState("");
-    const [apiSecret,  setApiSecret]  = useState("");
-    const [stage,      setStage]      = useState("idle");
-    const [balances,   setBalances]   = useState([]);
-    const [errorMsg,   setErrorMsg]   = useState("");
+    const [apiKey, setApiKey] = useState("");
+    const [apiSecret, setApiSecret] = useState("");
+    const [stage, setStage] = useState("idle");
+    const [balances, setBalances] = useState([]);
+    const [errorMsg, setErrorMsg] = useState("");
     const [showSecret, setShowSecret] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
-    const [countdown,  setCountdown]  = useState(REFRESH_INTERVAL / 1000);
+    const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
 
     const [token, setToken] = useState(() => {
         const saved = localStorage.getItem("auth");
-        
+
         return saved
-        ? JSON.parse(saved)
-        : null;
+            ? JSON.parse(saved)
+            : null;
     });
 
     useEffect(() => {
         if (token) {
+            setStage("loading");
             getWallet(token);
         }
     }, [token]);
 
 
-function getWallet(token) {
-    fetch(`${API}/auth/getBinanceWallet/${token.user.id}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token.token}`
-        },
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log("wallet data ->>> ", data);
-
-            if (!data.wallet || !data.valid) return;
-
-            setApiKey(data.wallet.api_key);
-            setApiSecret(data.wallet.api_secret);
-
-            const nonZero = data.account.balances
-                .filter(b => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0)
-                .sort((a, b) => parseFloat(b.free) - parseFloat(a.free));
-
-            setBalances(nonZero);
-            setStage("connected");
-            setLastUpdate(new Date());
-            setCountdown(REFRESH_INTERVAL / 1000);
-
-            keysRef.current = {
-                apiKey: data.wallet.api_key,
-                apiSecret: data.wallet.api_secret,
-                name: data.wallet.name,
-                id: data.wallet.user_id,
-            };
+    function getWallet(token) {
+        fetch(`${API}/auth/getBinanceWallet/${token.user.id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token.token}`
+            },
         })
-        .catch(error => console.error("Erro ao buscar carteira:", error));
-}
+            .then(response => response.json())
+            .then(data => {
+                console.log("wallet data ->>> ", data);
+
+                if (!data.wallet || !data.valid) return;
+
+                setApiKey(data.wallet.api_key);
+                setApiSecret(data.wallet.api_secret);
+
+                const nonZero = data.balances_merged
+                    .filter(b =>  !b.asset.startsWith("LD") && (parseFloat(b.free) > 0 || parseFloat(b.locked) > 0 || parseFloat(b.earn) > 0))
+                    .sort((a, b) => parseFloat(b.free) - parseFloat(a.free) || parseFloat(b.locked) - parseFloat(a.locked) || parseFloat(b.earn) - parseFloat(a.earn));
+
+                console.log("MERGED", data.balances_merged);
+                console.log("ACCOUNT", data.account.balances);
+
+                setBalances(nonZero);
+                setStage("connected");
+                setLastUpdate(new Date());
+                setCountdown(REFRESH_INTERVAL / 1000);
+
+                keysRef.current = {
+                    apiKey: data.wallet.api_key,
+                    apiSecret: data.wallet.api_secret,
+                    name: data.wallet.name,
+                    id: data.wallet.user_id,
+                };
+            })
+            .catch(error => console.error("Erro ao buscar carteira:", error));
+    }
 
 
-    const intervalRef  = useRef(null);
+    const intervalRef = useRef(null);
     const countdownRef = useRef(null);
-    const keysRef      = useRef({ apiKey: "", apiSecret: "", name: "", id: "" });
+    const keysRef = useRef({ apiKey: "", apiSecret: "", name: "", id: "" });
 
     // ── Busca saldo no proxy Python ───────────────────────────────
     const fetchBalances = useCallback(async (key, secret, silent = false) => {
         if (!silent) setStage("loading");
 
         try {
-            const res  = await fetch(`${PROXY}/api/account`, {
+            const res = await fetch(`${PROXY}/api/account`, {
                 headers: {
-                    "X-Api-Key":    key,
+                    "X-Api-Key": key,
                     "X-Api-Secret": secret,
                 },
             });
             const data = await res.json();
+            console.log('data:'  +  JSON.stringify(data));
 
             if (!res.ok) throw new Error(data.msg || data.error || `Erro ${res.status}`);
-
-            const nonZero = data.balances
-                .filter(b => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0)
-                .sort((a, b) => parseFloat(b.free) - parseFloat(a.free));
-
+            const nonZero = data.balances_merged
+                .filter(b =>  !b.asset.startsWith("LD") && (parseFloat(b.free) > 0 || parseFloat(b.locked) > 0 || parseFloat(b.earn) > 0))
+                .sort((a, b) => parseFloat(b.free) - parseFloat(a.free) || parseFloat(b.locked) - parseFloat(a.locked) || parseFloat(b.earn) - parseFloat(a.earn));
+            const pepe = data.balances_merged.find(b => b.asset === "pepe");
+            console.log("pepe PROXY", pepe);
             setBalances(nonZero);
             setStage("connected");
             setLastUpdate(new Date());
@@ -123,13 +129,13 @@ function getWallet(token) {
                 secret
             }),
         });
-    
+
         const data = await response.json();
-    
+
         if (!response.ok) {
             throw new Error(data.error || "Erro ao realizar cadastro.");
         }
-    
+
         return data;
     }
 
@@ -193,6 +199,18 @@ function getWallet(token) {
     }, [fetchBalances]);
 
     const fmtCountdown = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    const [currency, setCurrency] = useState("brl"); // "brl" | "usd" | "btc"
+    const [convertedBalances, setConvertedBalances] = useState([]);
+
+    useEffect(() => {
+        if (balances.length === 0) return;
+
+        convertBalancesList(balances, currency)
+            .then(setConvertedBalances)
+            .catch(err => console.error("Erro na conversão:", err));
+    }, [balances, currency]);
+
+    const total = sumConverted(convertedBalances);
 
     return (
         <div style={{
@@ -322,6 +340,37 @@ function getWallet(token) {
                             </span>
                         </div>
 
+                        {/* Total convertido + seletor de moeda */}
+                        <div style={{
+                            display: "flex", justifyContent: "space-between", alignItems: "center",
+                            marginBottom: 14, padding: "14px", background: "#181b22",
+                            borderRadius: 10, border: "1px solid #23252f",
+                        }}>
+                            <div>
+                                <div style={{ fontSize: 10, color: "#707687", marginBottom: 2 }}>TOTAL ESTIMADO</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 600, color: "#e8eaf0" }}>
+                                    {total.toFixed(8)} {currency.toUpperCase()}
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 6 }}>
+                                {["brl", "usd", "btc"].map(c => (
+                                    <button
+                                        key={c}
+                                        onClick={() => setCurrency(c)}
+                                        style={{
+                                            padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600,
+                                            cursor: "pointer", textTransform: "uppercase",
+                                            background: currency === c ? "#4f7fff" : "transparent",
+                                            color: currency === c ? "#fff" : "#707687",
+                                            border: `1px solid ${currency === c ? "#4f7fff" : "#2e3040"}`,
+                                        }}
+                                    >
+                                        {c}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Countdown */}
                         <div style={{
                             display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -350,7 +399,7 @@ function getWallet(token) {
                         ) : (
                             <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 300, overflowY: "auto" }}>
                                 {balances.map(b => {
-                                    const free   = parseFloat(b.free);
+                                    const free = parseFloat(b.free) + parseFloat(b.locked) + parseFloat(b.earn);
                                     const locked = parseFloat(b.locked);
                                     return (
                                         <div key={b.asset} style={{
@@ -381,6 +430,14 @@ function getWallet(token) {
                                                     {fmt(free)}
                                                 </div>
                                                 <div style={{ fontSize: 10, color: "#707687", marginTop: 2 }}>disponível</div>
+                                                {(() => {
+                                                    const cb = convertedBalances.find(c => c.asset === b.asset);
+                                                    return cb && cb.converted != null ? (
+                                                        <div style={{ fontSize: 11, color: "#4f7fff", marginTop: 2 }}>
+                                                            ≈ {cb.converted.toFixed(2)} {currency.toUpperCase()}
+                                                        </div>
+                                                    ) : null;
+                                                })()}
                                             </div>
                                         </div>
                                     );

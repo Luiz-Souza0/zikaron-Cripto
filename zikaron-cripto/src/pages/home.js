@@ -150,8 +150,8 @@ function CoinCard({ coin, ticker, volPct }) {
     return (
         <div  onClick={() => setClicked(!clicked)}
                 style={{
-                    background: clicked ? "#fffffaaa" : "#111318",
-                    border: clicked ? "2px solid #000000" : "1px solid #23252f",
+                    background: clicked ? "#2a2e3a" : "#111318",
+                    border:  clicked ? "3px solid #ffffff" : "1px solid #23252f",
                     borderRadius: 16,
                     padding: "22px",
                     cursor: "pointer",
@@ -159,8 +159,8 @@ function CoinCard({ coin, ticker, volPct }) {
                     position: "relative",
                     overflow: "hidden",
                 }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "#3b3d48"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "#23252f"; }}
+            onMouseEnter={clicked ? undefined : (e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "#3b3d48"; })}
+            onMouseLeave={clicked ? undefined : (e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "#23252f"; })}
         >
             {/* Flash overlay */}
             <div style={{
@@ -181,8 +181,8 @@ function CoinCard({ coin, ticker, volPct }) {
                         fontSize: 18, fontWeight: "bold", flexShrink: 0,
                     }}>{coin.icon}</div>
                     <div>
-                        <div style={{ fontWeight: 600, fontSize: 15, color: clicked ? "#4b4a4a" : "#e8eaf0" }}>{coin.name}</div>
-                        <div style={{ fontSize: 10, color: clicked ? "#000000" : "#707687", fontFamily: "monospace", marginTop: 3 }}>{coin.pair}</div>
+                        <div style={{ fontWeight: 600, fontSize: 15, color: "#e8eaf0" }}>{coin.name}</div>
+                        <div style={{ fontSize: 10, color:  "#707687", fontFamily: "monospace", marginTop: 3 }}>{coin.pair}</div>
                     </div>
                 </div>
 
@@ -196,7 +196,7 @@ function CoinCard({ coin, ticker, volPct }) {
             {/* Price */}
             <div style={{
                 fontSize: 28, fontFamily: "monospace", marginBottom: 18,
-                color: up ? "#00d48a" : down ? "#f0415a" : (clicked ? "#000000" : "#e8eaf0"),
+                color: up ? "#00d48a" : down ? "#f0415a" :  "#e8eaf0",
                 transition: "color 0.9s",
             }}>
                 {ticker.price !== null ? `$${fmt(ticker.price)}` : "..."}
@@ -214,10 +214,10 @@ function CoinCard({ coin, ticker, volPct }) {
                     ["Variação", changeStr],
                 ].map(([label, value], i) => (
                     <div key={i}>
-                        <div style={{ color: (clicked ? "#000000" : "#707687"), fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+                        <div style={{ color:  "#707687", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
                         <div style={{
                             fontFamily: "monospace", fontSize: 12, marginTop: 4,
-                            color: i === 3 ? (up ? "#00d48a" : down ? "#f0415a" : "#707687") : (clicked ? "#000000" : "#e8eaf0"),
+                            color: i === 3 ? (up ? "#00d48a" : down ? "#f0415a" : "#707687") :  "#e8eaf0",
                             fontWeight: clicked ? "bold" : "normal",
                         }}>{value}</div>
                     </div>

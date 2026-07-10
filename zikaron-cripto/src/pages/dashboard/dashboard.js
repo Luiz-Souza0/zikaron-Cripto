@@ -1,121 +1,5 @@
 import { useState } from "react";
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
-
-const USER = {
-  name: "Rafael Mendonça",
-  initials: "RM",
-  plan: "Pro",
-  email: "rafael@email.com",
-};
-
-const METRICS = [
-  {
-    id: "patrimonio",
-    label: "Patrimônio total",
-    value: "R$ 84.320",
-    change: "↑ 12,4% este mês",
-    trend: "up",
-    accent: "green",
-  },
-  {
-    id: "ganho",
-    label: "Ganho realizado",
-    value: "R$ 23.150",
-    change: "↑ maio–junho",
-    trend: "up",
-    accent: null,
-  },
-  {
-    id: "ir",
-    label: "IR estimado",
-    value: "R$ 3.472",
-    change: "15% sobre ganho",
-    trend: "down",
-    accent: "brown",
-  },
-  {
-    id: "limite",
-    label: "Limite mensal",
-    value: "R$ 35.000",
-    change: "R$ 11.850 restantes",
-    trend: "neutral",
-    accent: null,
-  },
-];
-
-const CHART_MONTHS = [
-  { month: "Jan", height: 40, current: false },
-  { month: "Fev", height: 36, current: false },
-  { month: "Mar", height: 53, current: false },
-  { month: "Abr", height: 46, current: false },
-  { month: "Mai", height: 66, current: false },
-  { month: "Jun", height: 78, current: true },
-];
-
-const WALLETS = [
-  {
-    id: "btc",
-    symbol: "₿",
-    name: "Bitcoin · Ledger",
-    address: "bc1q...x9r4",
-    brl: "R$ 48.200",
-    coin: "0.482 BTC",
-    color: "#f7931a",
-    connected: true,
-  },
-  {
-    id: "eth",
-    symbol: "Ξ",
-    name: "Ethereum · MetaMask",
-    address: "0x3f...a712",
-    brl: "R$ 22.400",
-    coin: "4.21 ETH",
-    color: "#627eea",
-    connected: true,
-  },
-  {
-    id: "bnb",
-    symbol: "B",
-    name: "BNB · Binance",
-    address: "API key ativa",
-    brl: "R$ 13.720",
-    coin: "28.4 BNB",
-    color: "#e6b800",
-    colorText: "#333",
-    connected: true,
-  },
-];
-
-const TAX_EVENTS = [
-  { month: "Março", gain: "R$ 8.400",  ir: "R$ 1.260", status: "Pago" },
-  { month: "Abril",  gain: "R$ 12.200", ir: "R$ 1.830", status: "Pago" },
-  { month: "Maio",   gain: "R$ 18.750", ir: "R$ 2.812", status: "Pendente" },
-  { month: "Junho",  gain: "R$ 23.150", ir: "R$ 3.472", status: "Em aberto" },
-];
-
-const GCAP_REPORTS = [
-  { month: "Março 2025",  gain: "R$ 8.400 em ganhos",  status: "Enviado" },
-  { month: "Abril 2025",  gain: "R$ 12.200 em ganhos", status: "Enviado" },
-  { month: "Maio 2025",   gain: "R$ 18.750 em ganhos", status: "Pendente" },
-];
-
-// NAV_ITEMS moved to ZikaronSidebar.jsx
-
-const MOBILE_NAV = [
-  { icon: "▦", label: "Início",    id: "dashboard" },
-  { icon: "◈", label: "Carteiras", id: "wallets"   },
-  { icon: "⊟", label: "GCAP",     id: "gcap"      },
-  { icon: "⚙", label: "Conta",    id: "settings"  },
-];
-
-const BANNER_AD = {
-  icon: "🛡",
-  title: "Contador especialista em cripto — CriptoContábil",
-  sub: "Declaração de IR para investidores. Primeira consulta grátis.",
-  cta: "Saiba mais",
-};
-
 // ─── TOKENS ──────────────────────────────────────────────────────────────────
 
 const C = {
@@ -369,25 +253,6 @@ function BannerFooter({ ad, onClose }) {
   );
 }
 
-// ─── MOBILE NAV ──────────────────────────────────────────────────────────────
-
-function MobileNav({ active, onNav }) {
-  return (
-    <div style={{ display: "flex", background: C.card, borderTop: `1px solid ${C.border}`, padding: "6px 0 10px" }}>
-      {MOBILE_NAV.map(item => (
-        <div
-          key={item.id}
-          onClick={() => onNav(item.id)}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, fontSize: 9.5, color: active === item.id ? C.green : C.textSec, cursor: "pointer", padding: "4px 0" }}
-        >
-          <span style={{ fontSize: 20 }}>{item.icon}</span>
-          {item.label}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ─── MAIN DASHBOARD ──────────────────────────────────────────────────────────
 
 export default function ZikaronDashboard() {
@@ -407,30 +272,9 @@ export default function ZikaronDashboard() {
         {/* SCROLLABLE CONTENT */}
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
 
-          {/* METRICS ROW */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 12 }}>
-            {METRICS.map(m => <MetricCard key={m.id} metric={m} />)}
-          </div>
-
-          {/* MID ROW */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 12 }}>
-            <PatrimonioChart data={CHART_MONTHS} />
-            <WalletsPanel wallets={WALLETS} />
-          </div>
-
-          {/* BOTTOM ROW */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <TaxEventsTable events={TAX_EVENTS} />
-            <GcapPanel reports={GCAP_REPORTS} />
-          </div>
-
         </div>
 
-        {/* BANNER */}
-        {bannerVisible && <BannerFooter ad={BANNER_AD} onClose={() => setBannerVisible(false)} />}
 
-        {/* MOBILE NAV */}
-        {isMobile && <MobileNav active={activeNav} onNav={setActiveNav} />}
       </div>
     </div>
   );
